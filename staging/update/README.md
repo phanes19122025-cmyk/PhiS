@@ -11,6 +11,9 @@
 **userStyle e Project_Settings sono FILE DI TESTO su Google Drive.**
 **KB Instructions è Google Docs.**
 
+**TUTTI I FILE RISIEDONO NELLA FOLDER STAGING:**
+https://drive.google.com/drive/folders/1cXVFJXOQBT7aeqz6Lg4Gzs8CvBNmMZfc
+
 | Risorsa | Tipo | Tool CORRETTO | Tool SBAGLIATO |
 |---------|------|---------------|----------------|
 | **userStyle** | File Drive (testo) | `GOOGLEDRIVE_EDIT_FILE` | ❌ GOOGLEDOCS_* |
@@ -19,11 +22,24 @@
 
 ---
 
+## 📂 FOLDER STAGING (Ubicazione Unica)
+
+**Folder ID:** `1cXVFJXOQBT7aeqz6Lg4Gzs8CvBNmMZfc`
+**URL:** https://drive.google.com/drive/folders/1cXVFJXOQBT7aeqz6Lg4Gzs8CvBNmMZfc
+
+Tutti i file di configurazione risiedono qui:
+- userStyle
+- Project_Settings
+- KB Instructions
+
+---
+
 ## 📝 userStyle — FILE TESTO
 
 **File ID:** `1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf`
 **URL:** https://drive.google.com/file/d/1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf
 **Tipo:** File Google Drive (text/plain) — NON è un Google Docs!
+**Folder:** Staging
 
 ### Aggiornamento CORRETTO
 
@@ -50,6 +66,7 @@ GOOGLEDOCS_CREATE_DOCUMENT_MARKDOWN(...)   # CREA DOCS, NON FILE TESTO
 **File ID:** `1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf`
 **URL:** https://drive.google.com/file/d/1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf
 **Tipo:** File Google Drive (text/plain) — NON è un Google Docs!
+**Folder:** Staging
 
 ### Aggiornamento CORRETTO
 
@@ -76,6 +93,7 @@ GOOGLEDOCS_CREATE_DOCUMENT_MARKDOWN(...)   # CREA DOCS, NON FILE TESTO
 **Doc ID:** `1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8`
 **URL:** https://docs.google.com/document/d/1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8
 **Tipo:** Google Docs
+**Folder:** Staging
 
 ### Aggiornamento CORRETTO
 
@@ -118,19 +136,22 @@ GOOGLEDOCS_CREATE_DOCUMENT_MARKDOWN(
 
 ---
 
-## 📁 Struttura Repository
+## 📁 Struttura Repository GitHub
 
 ```
-staging/update/
-├── README.md                    # Questo file (ISTRUZIONI IMPERATIVE)
-├── current/                     # Backup versioni correnti
-│   ├── userStyle_v*.md
-│   ├── project_settings_v*.txt
-│   └── kb_instructions_v*.md
-├── proposals/                   # Proposte modifica pending
-│   └── *.md
-└── changelog/
-    └── CHANGELOG.md
+phi-OS/
+├── README.md
+└── staging/
+    └── update/
+        ├── README.md                # Questo file (ISTRUZIONI IMPERATIVE)
+        ├── current/                 # Backup versioni correnti
+        │   ├── userStyle_v*.txt
+        │   ├── project_settings_v*.txt
+        │   └── kb_instructions_v*.md
+        ├── proposals/               # Proposte modifica pending
+        │   └── *.md
+        └── changelog/
+            └── CHANGELOG.md
 ```
 
 ---
@@ -145,21 +166,24 @@ staging/update/
 | **Update parziale** | Contenuto corrotto | Update ATOMICO e COMPLETO |
 | **No backup** | Perdita versione | SEMPRE salvare in current/ |
 | **No versioning** | Impossibile rollback | SEMPRE changelog |
+| **Creare nuovo file invece di edit** | Cambia URL/ID | Usa `GOOGLEDRIVE_EDIT_FILE` su file esistente |
 
 ---
 
 ## 🔗 Quick Reference
 
-| Risorsa | File ID | Tool |
-|---------|---------|------|
-| userStyle | `1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf` | `GOOGLEDRIVE_EDIT_FILE` |
-| Project_Settings | `1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf` | `GOOGLEDRIVE_EDIT_FILE` |
-| KB Instructions | `1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8` | `GOOGLEDOCS_UPDATE_*` |
+| Risorsa | File ID | Tool | URL |
+|---------|---------|------|-----|
+| **Folder Staging** | `1cXVFJXOQBT7aeqz6Lg4Gzs8CvBNmMZfc` | — | [Apri](https://drive.google.com/drive/folders/1cXVFJXOQBT7aeqz6Lg4Gzs8CvBNmMZfc) |
+| userStyle | `1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf` | `GOOGLEDRIVE_EDIT_FILE` | [Apri](https://drive.google.com/file/d/1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf) |
+| Project_Settings | `1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf` | `GOOGLEDRIVE_EDIT_FILE` | [Apri](https://drive.google.com/file/d/1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf) |
+| KB Instructions | `1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8` | `GOOGLEDOCS_UPDATE_*` | [Apri](https://docs.google.com/document/d/1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8) |
 
 ---
 
 ## 📌 Link Esterni
 
+- **Folder Staging:** https://drive.google.com/drive/folders/1cXVFJXOQBT7aeqz6Lg4Gzs8CvBNmMZfc
 - [userStyle (Drive)](https://drive.google.com/file/d/1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf)
 - [Project_Settings (Drive)](https://drive.google.com/file/d/1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf)
 - [KB Instructions (Docs)](https://docs.google.com/document/d/1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8)
