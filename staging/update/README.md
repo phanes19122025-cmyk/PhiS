@@ -4,98 +4,69 @@
 
 ---
 
-## ⚠️ ISTRUZIONI IMPERATIVE — LEGGERE PRIMA DI OGNI MODIFICA
+## ⚠️ ISTRUZIONI IMPERATIVE
 
-### 🚨 REGOLA FONDAMENTALE
+### REGOLA FONDAMENTALE
 
 **userStyle e Project_Settings sono FILE DI TESTO su Google Drive.**
 **KB Instructions è Google Docs.**
 
-**TUTTI I FILE RISIEDONO NELLA FOLDER STAGING:**
-https://drive.google.com/drive/folders/1cXVFJXOQBT7aeqz6Lg4Gzs8CvBNmMZfc
-
-| Risorsa | Tipo | Tool CORRETTO | Tool SBAGLIATO |
-|---------|------|---------------|----------------|
-| **userStyle** | File Drive (testo) | `GOOGLEDRIVE_EDIT_FILE` | ❌ GOOGLEDOCS_* |
-| **Project_Settings** | File Drive (testo) | `GOOGLEDRIVE_EDIT_FILE` | ❌ GOOGLEDOCS_* |
-| **KB Instructions** | Google Docs | `GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN` | — |
-
 ---
 
-## 📂 FOLDER STAGING (Ubicazione Unica)
+## 📂 FOLDER STAGING
 
-**Folder ID:** `1cXVFJXOQBT7aeqz6Lg4Gzs8CvBNmMZfc`
-**URL:** https://drive.google.com/drive/folders/1cXVFJXOQBT7aeqz6Lg4Gzs8CvBNmMZfc
-
-Tutti i file di configurazione risiedono qui:
-- userStyle
-- Project_Settings
-- KB Instructions
+Tutti i file risiedono qui:
+https://drive.google.com/drive/folders/1cXVFJXOQBT7aeqz6Lg4Gzs8CvBNmMZfc
 
 ---
 
 ## 📝 userStyle — FILE TESTO
 
-**File ID:** `1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf`
-**URL:** https://drive.google.com/file/d/1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf
-**Tipo:** File Google Drive (text/plain) — NON è un Google Docs!
-**Folder:** Staging
-
-### Aggiornamento CORRETTO
+| Cosa | Valore |
+|------|--------|
+| **Semantica** | Stile comportamentale Claude |
+| **URL** | https://drive.google.com/file/d/1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf |
+| **Tool** | `GOOGLEDRIVE_EDIT_FILE` |
 
 ```python
 GOOGLEDRIVE_EDIT_FILE(
     file_id="1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf",
-    content="...contenuto completo nuovo...",
+    content="...contenuto completo...",
     mime_type="text/plain"
 )
 ```
 
-### Aggiornamento SBAGLIATO ❌
-
-```python
-# NON USARE MAI QUESTI:
-GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN(...)  # FALLISCE SILENZIOSAMENTE
-GOOGLEDOCS_CREATE_DOCUMENT_MARKDOWN(...)   # CREA DOCS, NON FILE TESTO
-```
+❌ **MAI** usare `GOOGLEDOCS_*` — fallisce silenziosamente
 
 ---
 
 ## 📝 Project_Settings — FILE TESTO
 
-**File ID:** `1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf`
-**URL:** https://drive.google.com/file/d/1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf
-**Tipo:** File Google Drive (text/plain) — NON è un Google Docs!
-**Folder:** Staging
-
-### Aggiornamento CORRETTO
+| Cosa | Valore |
+|------|--------|
+| **Semantica** | Configurazione progetto 𝒰₁₃‷ |
+| **URL** | https://drive.google.com/file/d/1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf |
+| **Tool** | `GOOGLEDRIVE_EDIT_FILE` |
 
 ```python
 GOOGLEDRIVE_EDIT_FILE(
     file_id="1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf",
-    content="...contenuto completo nuovo...",
+    content="...contenuto completo...",
     mime_type="text/plain"
 )
 ```
 
-### Aggiornamento SBAGLIATO ❌
-
-```python
-# NON USARE MAI QUESTI:
-GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN(...)  # FALLISCE SILENZIOSAMENTE
-GOOGLEDOCS_CREATE_DOCUMENT_MARKDOWN(...)   # CREA DOCS, NON FILE TESTO
-```
+❌ **MAI** usare `GOOGLEDOCS_*` — fallisce silenziosamente
 
 ---
 
-## 📝 KB Instructions — GOOGLE DOCS + WORKAROUND BUG
+## 📝 KB Instructions — GOOGLE DOCS
 
-**Doc ID:** `1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8`
-**URL:** https://docs.google.com/document/d/1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8
-**Tipo:** Google Docs
-**Folder:** Staging
-
-### Aggiornamento CORRETTO
+| Cosa | Valore |
+|------|--------|
+| **Semantica** | Istruzioni Knowledge Base |
+| **URL** | https://docs.google.com/document/d/1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8 |
+| **Tool** | `GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN` |
 
 ```python
 GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN(
@@ -104,90 +75,33 @@ GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN(
 )
 ```
 
-### ⚠️ BUG RUBE: Tabelle Multiple
+### ⚠️ BUG TABELLE MULTIPLE
 
 **Issue:** https://github.com/ComposioHQ/composio/issues/2311
 
-**Problema:** `GOOGLEDOCS_CREATE_DOCUMENT_MARKDOWN` collassa tabelle markdown multiple nella prima.
-
-**WORKAROUND OBBLIGATORIO se ≥2 tabelle:**
-
-```python
-# 1. Crea Sheet separato per tabelle
-GOOGLESHEETS_CREATE_GOOGLE_SHEET1(title="[Nome Doc] - Tabelle")
-
-# 2. Per ogni tabella:
-GOOGLESHEETS_ADD_SHEET(spreadsheetId, title="Tab_N")
-GOOGLESHEETS_BATCH_UPDATE(
-    spreadsheetId, 
-    sheet_name="Tab_N", 
-    values=[[headers],[rows...]], 
-    first_cell_location="A1"
-)
-
-# 3. Docs SENZA tabelle + link allo Sheet
-GOOGLEDOCS_CREATE_DOCUMENT_MARKDOWN(
-    title="...",
-    markdown_text="...contenuto SENZA tabelle + link Sheet..."
-)
-```
-
-**ALTERNATIVA (doc unico):** Converti tabelle in liste • con **bold** per chiavi.
+**Workaround se ≥2 tabelle:** Crea Sheet separato + link nel Doc.
 
 ---
 
-## 📁 Struttura Repository GitHub
+## ⚠️ ERRORI DA EVITARE
 
-```
-phi-OS/
-├── README.md
-└── staging/
-    └── update/
-        ├── README.md                # Questo file (ISTRUZIONI IMPERATIVE)
-        ├── current/                 # Backup versioni correnti
-        │   ├── userStyle_v*.txt
-        │   ├── project_settings_v*.txt
-        │   └── kb_instructions_v*.md
-        ├── proposals/               # Proposte modifica pending
-        │   └── *.md
-        └── changelog/
-            └── CHANGELOG.md
-```
+| Errore | Conseguenza |
+|--------|-------------|
+| `GOOGLEDOCS_*` su file testo | Fallisce silenziosamente |
+| Creare nuovo file invece di edit | Cambia URL |
+| Update parziale | Contenuto corrotto |
+| Tabelle multiple in Docs | Collassano nella prima |
 
 ---
 
-## ⚠️ Errori da Evitare
+## 🔗 QUICK REFERENCE
 
-| Errore | Conseguenza | Correzione |
-|--------|-------------|------------|
-| **GOOGLEDOCS_* su userStyle** | Fallisce silenziosamente | Usa `GOOGLEDRIVE_EDIT_FILE` |
-| **GOOGLEDOCS_* su Project_Settings** | Fallisce silenziosamente | Usa `GOOGLEDRIVE_EDIT_FILE` |
-| **Tabelle multiple in KB** | Collassano nella prima | Workaround Sheet |
-| **Update parziale** | Contenuto corrotto | Update ATOMICO e COMPLETO |
-| **No backup** | Perdita versione | SEMPRE salvare in current/ |
-| **No versioning** | Impossibile rollback | SEMPRE changelog |
-| **Creare nuovo file invece di edit** | Cambia URL/ID | Usa `GOOGLEDRIVE_EDIT_FILE` su file esistente |
-
----
-
-## 🔗 Quick Reference
-
-| Risorsa | File ID | Tool | URL |
-|---------|---------|------|-----|
-| **Folder Staging** | `1cXVFJXOQBT7aeqz6Lg4Gzs8CvBNmMZfc` | — | [Apri](https://drive.google.com/drive/folders/1cXVFJXOQBT7aeqz6Lg4Gzs8CvBNmMZfc) |
-| userStyle | `1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf` | `GOOGLEDRIVE_EDIT_FILE` | [Apri](https://drive.google.com/file/d/1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf) |
-| Project_Settings | `1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf` | `GOOGLEDRIVE_EDIT_FILE` | [Apri](https://drive.google.com/file/d/1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf) |
-| KB Instructions | `1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8` | `GOOGLEDOCS_UPDATE_*` | [Apri](https://docs.google.com/document/d/1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8) |
-
----
-
-## 📌 Link Esterni
-
-- **Folder Staging:** https://drive.google.com/drive/folders/1cXVFJXOQBT7aeqz6Lg4Gzs8CvBNmMZfc
-- [userStyle (Drive)](https://drive.google.com/file/d/1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf)
-- [Project_Settings (Drive)](https://drive.google.com/file/d/1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf)
-- [KB Instructions (Docs)](https://docs.google.com/document/d/1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8)
-- [Bug Rube Tabelle](https://github.com/ComposioHQ/composio/issues/2311)
+| Risorsa | Tool | URL |
+|---------|------|-----|
+| **Folder Staging** | — | https://drive.google.com/drive/folders/1cXVFJXOQBT7aeqz6Lg4Gzs8CvBNmMZfc |
+| **userStyle** | `GOOGLEDRIVE_EDIT_FILE` | https://drive.google.com/file/d/1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf |
+| **Project_Settings** | `GOOGLEDRIVE_EDIT_FILE` | https://drive.google.com/file/d/1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf |
+| **KB Instructions** | `GOOGLEDOCS_UPDATE_*` | https://docs.google.com/document/d/1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8 |
 
 ---
 
