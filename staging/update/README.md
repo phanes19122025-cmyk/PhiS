@@ -4,37 +4,80 @@
 
 ---
 
-## ⚠️ ISTRUZIONI IMPERATIVE
+## ⚠️ ISTRUZIONI IMPERATIVE — LEGGERE PRIMA DI OGNI MODIFICA
 
-### Matrice Aggiornamento
+### 🚨 REGOLA FONDAMENTALE
 
-| Risorsa | Tipo | Tool | Note |
-|---------|------|------|------|
-| **userStyle** | File Drive (testo) | `GOOGLEDRIVE_EDIT_FILE` | Testo puro, NO Docs API |
-| **Project_Settings** | File Drive (testo) | `GOOGLEDRIVE_EDIT_FILE` | Testo puro, NO Docs API |
-| **KB Instructions** | Google Docs | `GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN` | Con workaround bug tabelle |
+**userStyle e Project_Settings sono FILE DI TESTO su Google Drive.**
+**KB Instructions è Google Docs.**
 
-### userStyle — IMPERATIVO
+| Risorsa | Tipo | Tool CORRETTO | Tool SBAGLIATO |
+|---------|------|---------------|----------------|
+| **userStyle** | File Drive (testo) | `GOOGLEDRIVE_EDIT_FILE` | ❌ GOOGLEDOCS_* |
+| **Project_Settings** | File Drive (testo) | `GOOGLEDRIVE_EDIT_FILE` | ❌ GOOGLEDOCS_* |
+| **KB Instructions** | Google Docs | `GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN` | — |
+
+---
+
+## 📝 userStyle — FILE TESTO
+
+**File ID:** `1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf`
+**URL:** https://drive.google.com/file/d/1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf
+**Tipo:** File Google Drive (text/plain) — NON è un Google Docs!
+
+### Aggiornamento CORRETTO
 
 ```python
 GOOGLEDRIVE_EDIT_FILE(
     file_id="1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf",
-    content="...contenuto completo...",
+    content="...contenuto completo nuovo...",
     mime_type="text/plain"
 )
 ```
 
-### Project_Settings — IMPERATIVO
+### Aggiornamento SBAGLIATO ❌
+
+```python
+# NON USARE MAI QUESTI:
+GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN(...)  # FALLISCE SILENZIOSAMENTE
+GOOGLEDOCS_CREATE_DOCUMENT_MARKDOWN(...)   # CREA DOCS, NON FILE TESTO
+```
+
+---
+
+## 📝 Project_Settings — FILE TESTO
+
+**File ID:** `1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf`
+**URL:** https://drive.google.com/file/d/1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf
+**Tipo:** File Google Drive (text/plain) — NON è un Google Docs!
+
+### Aggiornamento CORRETTO
 
 ```python
 GOOGLEDRIVE_EDIT_FILE(
-    file_id="1HwVZbe8Re_Av84D4CEIvXDE5GGXDSO-N",
-    content="...contenuto completo...",
+    file_id="1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf",
+    content="...contenuto completo nuovo...",
     mime_type="text/plain"
 )
 ```
 
-### KB Instructions — IMPERATIVO + WORKAROUND BUG
+### Aggiornamento SBAGLIATO ❌
+
+```python
+# NON USARE MAI QUESTI:
+GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN(...)  # FALLISCE SILENZIOSAMENTE
+GOOGLEDOCS_CREATE_DOCUMENT_MARKDOWN(...)   # CREA DOCS, NON FILE TESTO
+```
+
+---
+
+## 📝 KB Instructions — GOOGLE DOCS + WORKAROUND BUG
+
+**Doc ID:** `1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8`
+**URL:** https://docs.google.com/document/d/1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8
+**Tipo:** Google Docs
+
+### Aggiornamento CORRETTO
 
 ```python
 GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN(
@@ -43,11 +86,11 @@ GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN(
 )
 ```
 
-#### ⚠️ BUG RUBE: Tabelle Multiple
+### ⚠️ BUG RUBE: Tabelle Multiple
 
 **Issue:** https://github.com/ComposioHQ/composio/issues/2311
 
-**Problema:** `GOOGLEDOCS_CREATE_DOCUMENT_MARKDOWN` collassa tabelle multiple nella prima.
+**Problema:** `GOOGLEDOCS_CREATE_DOCUMENT_MARKDOWN` collassa tabelle markdown multiple nella prima.
 
 **WORKAROUND OBBLIGATORIO se ≥2 tabelle:**
 
@@ -75,30 +118,6 @@ GOOGLEDOCS_CREATE_DOCUMENT_MARKDOWN(
 
 ---
 
-## 📍 Ubicazioni
-
-### userStyle
-- **Tipo:** File Google Drive (testo puro)
-- **URL:** https://drive.google.com/file/d/1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf
-- **File ID:** `1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf`
-- **Tool:** `GOOGLEDRIVE_EDIT_FILE`
-- **Anche usato in:** Anthropic → Settings → Profile → Style
-
-### Project_Settings
-- **Tipo:** File Google Drive (testo puro)
-- **URL:** https://drive.google.com/file/d/1HwVZbe8Re_Av84D4CEIvXDE5GGXDSO-N
-- **File ID:** `1HwVZbe8Re_Av84D4CEIvXDE5GGXDSO-N`
-- **Tool:** `GOOGLEDRIVE_EDIT_FILE`
-
-### KB Instructions
-- **Tipo:** Google Docs
-- **URL:** https://docs.google.com/document/d/1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8
-- **Doc ID:** `1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8`
-- **Tool:** `GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN`
-- **⚠️:** Applicare workaround bug se ≥2 tabelle
-
----
-
 ## 📁 Struttura Repository
 
 ```
@@ -106,7 +125,7 @@ staging/update/
 ├── README.md                    # Questo file (ISTRUZIONI IMPERATIVE)
 ├── current/                     # Backup versioni correnti
 │   ├── userStyle_v*.md
-│   ├── project_settings_v*.md
+│   ├── project_settings_v*.txt
 │   └── kb_instructions_v*.md
 ├── proposals/                   # Proposte modifica pending
 │   └── *.md
@@ -120,22 +139,31 @@ staging/update/
 
 | Errore | Conseguenza | Correzione |
 |--------|-------------|------------|
-| Docs API su userStyle/Project_Settings | Fallisce | Usa `GOOGLEDRIVE_EDIT_FILE` |
-| Tabelle multiple in KB Docs | Collassano | Workaround Sheet |
-| Update parziale | Contenuto corrotto | Update ATOMICO e COMPLETO |
-| No backup | Perdita versione | SEMPRE salvare in current/ |
-| No versioning | Impossibile rollback | SEMPRE changelog |
+| **GOOGLEDOCS_* su userStyle** | Fallisce silenziosamente | Usa `GOOGLEDRIVE_EDIT_FILE` |
+| **GOOGLEDOCS_* su Project_Settings** | Fallisce silenziosamente | Usa `GOOGLEDRIVE_EDIT_FILE` |
+| **Tabelle multiple in KB** | Collassano nella prima | Workaround Sheet |
+| **Update parziale** | Contenuto corrotto | Update ATOMICO e COMPLETO |
+| **No backup** | Perdita versione | SEMPRE salvare in current/ |
+| **No versioning** | Impossibile rollback | SEMPRE changelog |
 
 ---
 
-## 🔗 Quick Links
+## 🔗 Quick Reference
 
-| Risorsa | Link | Tool |
-|---------|------|------|
-| userStyle | [Drive](https://drive.google.com/file/d/1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf) | GOOGLEDRIVE_EDIT_FILE |
-| Project_Settings | [Drive](https://drive.google.com/file/d/1HwVZbe8Re_Av84D4CEIvXDE5GGXDSO-N) | GOOGLEDRIVE_EDIT_FILE |
-| KB Instructions | [Docs](https://docs.google.com/document/d/1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8) | GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN |
-| Bug Rube Tabelle | [Issue #2311](https://github.com/ComposioHQ/composio/issues/2311) | — |
+| Risorsa | File ID | Tool |
+|---------|---------|------|
+| userStyle | `1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf` | `GOOGLEDRIVE_EDIT_FILE` |
+| Project_Settings | `1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf` | `GOOGLEDRIVE_EDIT_FILE` |
+| KB Instructions | `1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8` | `GOOGLEDOCS_UPDATE_*` |
+
+---
+
+## 📌 Link Esterni
+
+- [userStyle (Drive)](https://drive.google.com/file/d/1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf)
+- [Project_Settings (Drive)](https://drive.google.com/file/d/1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf)
+- [KB Instructions (Docs)](https://docs.google.com/document/d/1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8)
+- [Bug Rube Tabelle](https://github.com/ComposioHQ/composio/issues/2311)
 
 ---
 
