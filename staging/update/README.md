@@ -17,35 +17,26 @@
 ### userStyle — IMPERATIVO
 
 ```python
-# CORRETTO
 GOOGLEDRIVE_EDIT_FILE(
     file_id="1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf",
     content="...contenuto completo...",
     mime_type="text/plain"
 )
-
-# SBAGLIATO - NON usare Docs API
-# GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN  ← NO!
 ```
 
 ### Project_Settings — IMPERATIVO
 
 ```python
-# CORRETTO
 GOOGLEDRIVE_EDIT_FILE(
-    file_id="ID_FILE_DRIVE",
+    file_id="1HwVZbe8Re_Av84D4CEIvXDE5GGXDSO-N",
     content="...contenuto completo...",
     mime_type="text/plain"
 )
-
-# SBAGLIATO - NON usare Docs API
-# GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN  ← NO!
 ```
 
 ### KB Instructions — IMPERATIVO + WORKAROUND BUG
 
 ```python
-# CORRETTO - Google Docs con workaround tabelle
 GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN(
     id="1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8",
     markdown="...contenuto..."
@@ -94,10 +85,10 @@ GOOGLEDOCS_CREATE_DOCUMENT_MARKDOWN(
 - **Anche usato in:** Anthropic → Settings → Profile → Style
 
 ### Project_Settings
-- **Tipo:** Google Docs (da trattare come testo)
-- **URL:** https://docs.google.com/document/d/1Wdz0Y65tT-QC7I_Ej-4GJvbO5tfqQKdJSIyqOsPyCk0
-- **Doc ID:** `1Wdz0Y65tT-QC7I_Ej-4GJvbO5tfqQKdJSIyqOsPyCk0`
-- **Tool:** `GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN` (contenuto come testo)
+- **Tipo:** File Google Drive (testo puro)
+- **URL:** https://drive.google.com/file/d/1HwVZbe8Re_Av84D4CEIvXDE5GGXDSO-N
+- **File ID:** `1HwVZbe8Re_Av84D4CEIvXDE5GGXDSO-N`
+- **Tool:** `GOOGLEDRIVE_EDIT_FILE`
 
 ### KB Instructions
 - **Tipo:** Google Docs
@@ -129,8 +120,8 @@ staging/update/
 
 | Errore | Conseguenza | Correzione |
 |--------|-------------|------------|
-| Docs API su userStyle | Fallisce silenziosamente | Usa `GOOGLEDRIVE_EDIT_FILE` |
-| Tabelle multiple in Docs | Collassano nella prima | Workaround Sheet |
+| Docs API su userStyle/Project_Settings | Fallisce | Usa `GOOGLEDRIVE_EDIT_FILE` |
+| Tabelle multiple in KB Docs | Collassano | Workaround Sheet |
 | Update parziale | Contenuto corrotto | Update ATOMICO e COMPLETO |
 | No backup | Perdita versione | SEMPRE salvare in current/ |
 | No versioning | Impossibile rollback | SEMPRE changelog |
@@ -142,7 +133,7 @@ staging/update/
 | Risorsa | Link | Tool |
 |---------|------|------|
 | userStyle | [Drive](https://drive.google.com/file/d/1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf) | GOOGLEDRIVE_EDIT_FILE |
-| Project_Settings | [Docs](https://docs.google.com/document/d/1Wdz0Y65tT-QC7I_Ej-4GJvbO5tfqQKdJSIyqOsPyCk0) | GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN |
+| Project_Settings | [Drive](https://drive.google.com/file/d/1HwVZbe8Re_Av84D4CEIvXDE5GGXDSO-N) | GOOGLEDRIVE_EDIT_FILE |
 | KB Instructions | [Docs](https://docs.google.com/document/d/1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8) | GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN |
 | Bug Rube Tabelle | [Issue #2311](https://github.com/ComposioHQ/composio/issues/2311) | — |
 
