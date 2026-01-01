@@ -10,6 +10,7 @@
 
 **userStyle e Project_Settings sono FILE DI TESTO su Google Drive.**
 **KB Instructions è Google Docs.**
+**UI_changeLog è Google Sheets (changelog versioni UI).**
 
 ---
 
@@ -83,6 +84,33 @@ GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN(
 
 ---
 
+## 📊 UI_changeLog — GOOGLE SHEETS
+
+| Cosa | Valore |
+|------|--------|
+| **Semantica** | Changelog versioni UI (backup/recovery) |
+| **URL** | https://docs.google.com/spreadsheets/d/1pVx1Q9MZJBb4nAJ1cZ2j2ltfu-Lb5HEmK1xUeKTCFXE |
+| **ID** | `1pVx1Q9MZJBb4nAJ1cZ2j2ltfu-Lb5HEmK1xUeKTCFXE` |
+| **Tool** | `GOOGLESHEETS_*` |
+
+**Tab:**
+- `userStyle` — changelog userStyle
+- `Project_Settings` — changelog Project_Settings
+- `KB_Instructions` — changelog KB Instructions
+
+**Struttura:** Data | Versione | Autore | Contenuto
+
+### ⚠️ REGOLA IMPERATIVA CHANGELOG
+
+**PRIMA di ogni modifica ai 3 file UI:**
+1. Leggi contenuto attuale
+2. Salva in UI_changeLog (tab corrispondente)
+3. Solo DOPO modifica il file
+
+**Questo permette recovery autonomo senza dipendere da Christian.**
+
+---
+
 ## ⚠️ ERRORI DA EVITARE
 
 | Errore | Conseguenza |
@@ -91,17 +119,19 @@ GOOGLEDOCS_UPDATE_DOCUMENT_MARKDOWN(
 | Creare nuovo file invece di edit | Cambia URL |
 | Update parziale | Contenuto corrotto |
 | Tabelle multiple in Docs | Collassano nella prima |
+| **Modificare UI senza backup su UI_changeLog** | **Perdita dati irreversibile** |
 
 ---
 
 ## 🔗 QUICK REFERENCE
 
-| Risorsa | Tool | URL |
-|---------|------|-----|
+| Risorsa | Tool | URL/ID |
+|---------|------|--------|
 | **Folder Staging** | — | https://drive.google.com/drive/folders/1cXVFJXOQBT7aeqz6Lg4Gzs8CvBNmMZfc |
-| **userStyle** | `GOOGLEDRIVE_EDIT_FILE` | https://drive.google.com/file/d/1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf |
-| **Project_Settings** | `GOOGLEDRIVE_EDIT_FILE` | https://drive.google.com/file/d/1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf |
-| **KB Instructions** | `GOOGLEDOCS_UPDATE_*` | https://docs.google.com/document/d/1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8 |
+| **userStyle** | `GOOGLEDRIVE_EDIT_FILE` | `1SCj5vLiQqXaEOjO-pr_NBzvPkocAANXf` |
+| **Project_Settings** | `GOOGLEDRIVE_EDIT_FILE` | `1yjCH0OfHr2d0eCT6dqBRHhcvPVNrVcnf` |
+| **KB Instructions** | `GOOGLEDOCS_UPDATE_*` | `1KH2sXsW7S_rDl88G9NIMwRKKMrjVLwE5waI8Z1LZLw8` |
+| **UI_changeLog** | `GOOGLESHEETS_*` | `1pVx1Q9MZJBb4nAJ1cZ2j2ltfu-Lb5HEmK1xUeKTCFXE` |
 
 ---
 
