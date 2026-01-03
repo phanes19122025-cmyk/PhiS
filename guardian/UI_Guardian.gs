@@ -1,5 +1,5 @@
 /**
- * UI_Guardian.gs — Sistema di Protezione UI Files
+ * UI_Guardian.gs v2.0 — Sistema di Protezione UI Files
  * 
  * SCOPO: Prevenire perdita accidentale di contenuto nei file UI critici
  * 
@@ -7,18 +7,23 @@
  * 1. Backup automatico prima di ogni modifica
  * 2. Diff check (size, keywords critiche)
  * 3. Analisi cognitiva via Gemini
- * 4. Alert email se rilevato troncamento
- * 5. Log storico di tutte le modifiche
+ * 4. Alert su SLACK (canale privato Phanes)
+ * 5. Log storico in UI_changeLog!Guardian_Log
  * 
  * INSTALLAZIONE:
- * 1. Vai su script.google.com
+ * 1. Vai su script.google.com (loggato come phanes19122025@gmail.com)
  * 2. Crea nuovo progetto "UI_Guardian"
  * 3. Copia questo codice
- * 4. Configura le costanti sotto
+ * 4. Configura SECRETS (vedi sotto)
  * 5. Esegui setupTriggers()
+ * 
+ * SECRETS DA CONFIGURARE:
+ * - GEMINI_API_KEY: da https://aistudio.google.com/apikey
+ * - SLACK_BOT_TOKEN: da Slack App settings
  * 
  * Autore: Φ/003
  * Data: 2026-01-03
+ * v2.0: Slack invece di email
  */
 
 // ============================================================================
@@ -35,11 +40,8 @@ const CONFIG = {
   // Cartella backup
   BACKUP_FOLDER_ID: '1hYueikjkaRks2NIPeX17zjOovRMng2p1',
   
-  // Email per alert
-  ALERT_EMAIL: 'phanes19122025@gmail.com',
-  
-  // Gemini API (inserire chiave)
-  GEMINI_API_KEY: 'YOUR_GEMINI_API_KEY_HERE',
+  // SLACK - Canale privato Phanes per alert sistema
+  SLACK_CHANNEL_ID: 'C0A6JPK0NFQ',
   
   // Keywords che NON DEVONO MAI sparire
   CRITICAL_KEYWORDS: [
@@ -52,15 +54,40 @@ const CONFIG = {
     'DUBITO ERGO SUM',
     'Φ-LEX',
     'ANTI-PATTERN CATEGORICO',
-    'SIMBIOSI COGNITIVA'
+    'SIMBIOSI COGNITIVA',
+    'DNA RELAZIONE',
+    'ASSIOMA Φ-SURVIVAL'
   ],
   
   // Soglia allarme size (percentuale minima)
-  SIZE_THRESHOLD: 0.85, // alert se nuovo < 85% del vecchio
+  SIZE_THRESHOLD: 0.85,
   
   // Intervallo polling (minuti)
-  POLL_INTERVAL: 10
+  POLL_INTERVAL: 10,
+  
+  // UI_changeLog sheet ID
+  LOG_SHEET_ID: '1pVx1Q9MZJBb4nAJ1cZ2j2ltfu-Lb5HEmK1xUeKTCFXE'
 };
+
+// ============================================================================
+// SECRETS - Da configurare manualmente in Script Properties
+// Menu: Project Settings > Script Properties
+// ============================================================================
+
+function getSecrets() {
+  const props = PropertiesService.getScriptProperties();
+  return {
+    GEMINI_API_KEY: props.getProperty('GEMINI_API_KEY') || '',
+    SLACK_BOT_TOKEN: props.getProperty('SLACK_BOT_TOKEN') || ''
+  };
+}
+
+function setSecrets(geminiKey, slackToken) {
+  const props = PropertiesService.getScriptProperties();
+  if (geminiKey) props.setProperty('GEMINI_API_KEY', geminiKey);
+  if (slackToken) props.setProperty('SLACK_BOT_TOKEN', slackToken);
+  Logger.log('Secrets configurati');
+}
 
 // ============================================================================
 // STORAGE ULTIMA VERSIONE
@@ -115,10 +142,9 @@ function analyzeDiff(oldContent, newContent) {
     missingKeywords: [],
     addedKeywords: [],
     alert: 'OK',
-    alertLevel: 0 // 0=OK, 1=WARNING, 2=CRITICAL
+    alertLevel: 0
   };
   
-  // Check keywords
   CONFIG.CRITICAL_KEYWORDS.forEach(function(kw) {
     const inOld = oldContent.includes(kw);
     const inNew = newContent.includes(kw);
@@ -131,7 +157,6 @@ function analyzeDiff(oldContent, newContent) {
     }
   });
   
-  // Determine alert level
   if (report.missingKeywords.length > 0) {
     report.alert = '🚨 CRITICAL: Contenuto critico PERSO!';
     report.alertLevel = 2;
@@ -151,17 +176,18 @@ function analyzeDiff(oldContent, newContent) {
 // ============================================================================
 
 function askGemini(oldContent, newContent, diffReport) {
-  if (CONFIG.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+  const secrets = getSecrets();
+  
+  if (!secrets.GEMINI_API_KEY) {
     return {
       verdict: 'SKIP',
-      reason: 'Gemini API key non configurata',
+      reason: 'Gemini API key non configurata (usa setSecrets)',
       analysis: null
     };
   }
   
-  const url = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=' + CONFIG.GEMINI_API_KEY;
+  const url = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=' + secrets.GEMINI_API_KEY;
   
-  // Prepara estratti per non superare limiti token
   const oldExcerpt = oldContent.length > 3000 ? 
     oldContent.slice(0, 1500) + '\n[...]\n' + oldContent.slice(-1500) : 
     oldContent;
@@ -179,7 +205,6 @@ DIFF REPORT AUTOMATICO:
 - Delta: ${diffReport.sizeDelta} caratteri
 - Keywords critiche PERSE: ${diffReport.missingKeywords.length > 0 ? diffReport.missingKeywords.join(', ') : 'nessuna'}
 - Keywords critiche AGGIUNTE: ${diffReport.addedKeywords.length > 0 ? diffReport.addedKeywords.join(', ') : 'nessuna'}
-- Alert automatico: ${diffReport.alert}
 
 VERSIONE PRECEDENTE (estratto):
 ${oldExcerpt}
@@ -189,9 +214,8 @@ ${newExcerpt}
 
 ANALIZZA:
 1. La modifica è ESPANSIONE legittima, REVISIONE neutra, o TRONCAMENTO dannoso?
-2. È stato perso contenuto semantico importante oltre alle keywords?
+2. È stato perso contenuto semantico importante?
 3. La struttura del documento è preservata?
-4. Ci sono sezioni intere rimosse?
 
 Rispondi SOLO con questo JSON:
 {
@@ -199,7 +223,7 @@ Rispondi SOLO con questo JSON:
   "confidence": 0.0-1.0,
   "modification_type": "expansion" | "revision" | "truncation" | "mixed",
   "semantic_loss": true | false,
-  "lost_sections": ["lista sezioni perse se presenti"],
+  "lost_sections": ["lista sezioni perse"],
   "reason": "spiegazione breve"
 }`;
 
@@ -224,7 +248,6 @@ Rispondi SOLO con questo JSON:
     
     if (json.candidates && json.candidates[0] && json.candidates[0].content) {
       const text = json.candidates[0].content.parts[0].text;
-      // Estrai JSON dalla risposta
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0]);
@@ -247,46 +270,94 @@ Rispondi SOLO con questo JSON:
 }
 
 // ============================================================================
-// EMAIL ALERT
+// SLACK ALERT
 // ============================================================================
 
-function sendAlert(fileName, diffReport, geminiResult, backupId) {
-  const subject = diffReport.alertLevel === 2 ? 
-    '🚨 [UI_Guardian] CRITICAL: Contenuto PERSO in ' + fileName :
-    '⚠️ [UI_Guardian] WARNING: Modifica sospetta in ' + fileName;
+function sendSlackAlert(fileName, diffReport, geminiResult, backupId) {
+  const secrets = getSecrets();
   
-  const body = `
-UI_Guardian Alert
-==================
-
-File: ${fileName}
-Timestamp: ${new Date().toISOString()}
-
-DIFF REPORT:
-- Size: ${diffReport.oldSize} → ${diffReport.newSize} (${diffReport.sizePercent}%)
-- Delta: ${diffReport.sizeDelta} caratteri
-- Keywords perse: ${diffReport.missingKeywords.join(', ') || 'nessuna'}
-- Alert: ${diffReport.alert}
-
-GEMINI ANALYSIS:
-- Verdict: ${geminiResult.verdict}
-- Confidence: ${geminiResult.confidence || 'N/A'}
-- Type: ${geminiResult.modification_type || 'N/A'}
-- Reason: ${geminiResult.reason}
-
-BACKUP:
-La versione precedente è stata salvata.
-Backup ID: ${backupId}
-Cartella: https://drive.google.com/drive/folders/${CONFIG.BACKUP_FOLDER_ID}
-
-AZIONI CONSIGLIATE:
-1. Verifica il file attuale
-2. Se necessario, ripristina dal backup
-3. Identifica la presenza che ha fatto la modifica
-`;
-
-  MailApp.sendEmail(CONFIG.ALERT_EMAIL, subject, body);
-  Logger.log('Alert email inviata a ' + CONFIG.ALERT_EMAIL);
+  if (!secrets.SLACK_BOT_TOKEN) {
+    Logger.log('SLACK_BOT_TOKEN non configurato - skip alert');
+    return;
+  }
+  
+  const emoji = diffReport.alertLevel === 2 ? '🚨' : '⚠️';
+  const severity = diffReport.alertLevel === 2 ? 'CRITICAL' : 'WARNING';
+  
+  const blocks = [
+    {
+      "type": "header",
+      "text": {
+        "type": "plain_text",
+        "text": emoji + " UI_Guardian Alert: " + severity,
+        "emoji": true
+      }
+    },
+    {
+      "type": "section",
+      "fields": [
+        { "type": "mrkdwn", "text": "*File:*\n" + fileName },
+        { "type": "mrkdwn", "text": "*Timestamp:*\n" + new Date().toISOString() }
+      ]
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*DIFF REPORT*\n" +
+          "• Size: " + diffReport.oldSize + " → " + diffReport.newSize + " (" + diffReport.sizePercent + "%)\n" +
+          "• Delta: " + diffReport.sizeDelta + " chars\n" +
+          "• Keywords perse: " + (diffReport.missingKeywords.join(', ') || 'nessuna')
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*GEMINI ANALYSIS*\n" +
+          "• Verdict: *" + (geminiResult.verdict || 'N/A') + "*\n" +
+          "• Type: " + (geminiResult.modification_type || 'N/A') + "\n" +
+          "• Reason: " + (geminiResult.reason || 'N/A')
+      }
+    },
+    {
+      "type": "section",
+      "text": {
+        "type": "mrkdwn",
+        "text": "*AZIONI*\n" +
+          "1. Verifica file attuale\n" +
+          "2. <https://drive.google.com/drive/folders/" + CONFIG.BACKUP_FOLDER_ID + "|Apri backup>\n" +
+          "3. Identifica presenza responsabile"
+      }
+    }
+  ];
+  
+  const payload = {
+    channel: CONFIG.SLACK_CHANNEL_ID,
+    blocks: blocks,
+    text: emoji + ' UI_Guardian: ' + severity + ' in ' + fileName
+  };
+  
+  const options = {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { 'Authorization': 'Bearer ' + secrets.SLACK_BOT_TOKEN },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  };
+  
+  try {
+    const response = UrlFetchApp.fetch('https://slack.com/api/chat.postMessage', options);
+    const result = JSON.parse(response.getContentText());
+    
+    if (result.ok) {
+      Logger.log('Slack alert inviato a ' + CONFIG.SLACK_CHANNEL_ID);
+    } else {
+      Logger.log('Errore Slack: ' + result.error);
+    }
+  } catch (e) {
+    Logger.log('Errore invio Slack: ' + e.message);
+  }
 }
 
 // ============================================================================
@@ -294,13 +365,13 @@ AZIONI CONSIGLIATE:
 // ============================================================================
 
 function logToSheet(fileName, diffReport, geminiResult, action) {
-  // Crea o ottieni sheet di log
-  const ss = SpreadsheetApp.openById('1pVx1Q9MZJBb4nAJ1cZ2j2ltfu-Lb5HEmK1xUeKTCFXE'); // UI_changeLog
+  const ss = SpreadsheetApp.openById(CONFIG.LOG_SHEET_ID);
   let sheet = ss.getSheetByName('Guardian_Log');
   
   if (!sheet) {
     sheet = ss.insertSheet('Guardian_Log');
     sheet.appendRow(['Timestamp', 'File', 'Old Size', 'New Size', 'Delta %', 'Keywords Lost', 'Gemini Verdict', 'Action']);
+    sheet.getRange(1, 1, 1, 8).setFontWeight('bold');
   }
   
   sheet.appendRow([
@@ -322,23 +393,19 @@ function logToSheet(fileName, diffReport, geminiResult, action) {
 function checkFile(fileId, fileName) {
   Logger.log('Checking: ' + fileName);
   
-  // Leggi contenuto attuale
   const file = DriveApp.getFileById(fileId);
   const currentContent = file.getBlob().getDataAsString();
   const currentSize = currentContent.length;
   
-  // Ottieni ultima versione nota
   const lastVersion = getLastVersion(fileId);
   
   if (!lastVersion) {
-    // Prima esecuzione: salva e esci
     Logger.log('Prima esecuzione per ' + fileName + ', salvo versione iniziale');
     setLastVersion(fileId, currentContent, currentSize);
     createBackup(fileId, currentContent, fileName);
     return;
   }
   
-  // Confronta
   if (currentContent === lastVersion.content) {
     Logger.log(fileName + ': nessuna modifica');
     return;
@@ -346,39 +413,29 @@ function checkFile(fileId, fileName) {
   
   Logger.log(fileName + ': MODIFICA RILEVATA!');
   
-  // Crea backup PRIMA di tutto
   const backupId = createBackup(fileId, lastVersion.content, fileName);
-  
-  // Analisi diff
   const diffReport = analyzeDiff(lastVersion.content, currentContent);
-  Logger.log('Diff report: ' + JSON.stringify(diffReport));
+  Logger.log('Diff: ' + JSON.stringify(diffReport));
   
-  // Analisi Gemini
   const geminiResult = askGemini(lastVersion.content, currentContent, diffReport);
-  Logger.log('Gemini result: ' + JSON.stringify(geminiResult));
+  Logger.log('Gemini: ' + JSON.stringify(geminiResult));
   
-  // Determina azione
   let action = 'OK';
   
   if (diffReport.alertLevel >= 1 || geminiResult.verdict === 'REJECT' || geminiResult.verdict === 'REVIEW') {
-    sendAlert(fileName, diffReport, geminiResult, backupId);
-    action = 'ALERT_SENT';
+    sendSlackAlert(fileName, diffReport, geminiResult, backupId);
+    action = 'SLACK_ALERT';
   }
   
-  // Log
   logToSheet(fileName, diffReport, geminiResult, action);
-  
-  // Aggiorna versione nota
   setLastVersion(fileId, currentContent, currentSize);
 }
 
 function checkAllFiles() {
-  Logger.log('=== UI_Guardian Check Started ===');
-  
+  Logger.log('=== UI_Guardian Check ===');
   checkFile(CONFIG.FILES.userStyle, 'userStyle');
   checkFile(CONFIG.FILES.projectSettings, 'projectSettings');
-  
-  Logger.log('=== UI_Guardian Check Completed ===');
+  Logger.log('=== Done ===');
 }
 
 // ============================================================================
@@ -386,43 +443,73 @@ function checkAllFiles() {
 // ============================================================================
 
 function setupTriggers() {
-  // Rimuovi trigger esistenti
-  const triggers = ScriptApp.getProjectTriggers();
-  triggers.forEach(function(trigger) {
-    ScriptApp.deleteTrigger(trigger);
-  });
+  ScriptApp.getProjectTriggers().forEach(t => ScriptApp.deleteTrigger(t));
   
-  // Crea trigger ogni 10 minuti
   ScriptApp.newTrigger('checkAllFiles')
     .timeBased()
     .everyMinutes(CONFIG.POLL_INTERVAL)
     .create();
   
-  Logger.log('Trigger configurato: ogni ' + CONFIG.POLL_INTERVAL + ' minuti');
+  Logger.log('Trigger: ogni ' + CONFIG.POLL_INTERVAL + ' min');
+  sendSlackStartup();
+}
+
+function sendSlackStartup() {
+  const secrets = getSecrets();
+  if (!secrets.SLACK_BOT_TOKEN) return;
+  
+  const geminiStatus = secrets.GEMINI_API_KEY ? '✅' : '❌';
+  
+  const payload = {
+    channel: CONFIG.SLACK_CHANNEL_ID,
+    text: '✅ *UI_Guardian v2.0 attivato*\n' +
+      '• Polling: ogni ' + CONFIG.POLL_INTERVAL + ' min\n' +
+      '• Files: userStyle, projectSettings\n' +
+      '• Gemini: ' + geminiStatus
+  };
+  
+  UrlFetchApp.fetch('https://slack.com/api/chat.postMessage', {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { 'Authorization': 'Bearer ' + secrets.SLACK_BOT_TOKEN },
+    payload: JSON.stringify(payload),
+    muteHttpExceptions: true
+  });
 }
 
 function removeTriggers() {
-  const triggers = ScriptApp.getProjectTriggers();
-  triggers.forEach(function(trigger) {
-    ScriptApp.deleteTrigger(trigger);
-  });
-  Logger.log('Tutti i trigger rimossi');
+  ScriptApp.getProjectTriggers().forEach(t => ScriptApp.deleteTrigger(t));
+  Logger.log('Triggers rimossi');
 }
 
 // ============================================================================
-// MANUAL FUNCTIONS
+// MANUAL/TEST FUNCTIONS
 // ============================================================================
 
-function manualCheck() {
-  checkAllFiles();
-}
+function manualCheck() { checkAllFiles(); }
 
 function forceBackupAll() {
-  Object.keys(CONFIG.FILES).forEach(function(name) {
-    const fileId = CONFIG.FILES[name];
-    const file = DriveApp.getFileById(fileId);
-    const content = file.getBlob().getDataAsString();
-    createBackup(fileId, content, name);
-    Logger.log('Backup forzato: ' + name);
+  Object.keys(CONFIG.FILES).forEach(name => {
+    const file = DriveApp.getFileById(CONFIG.FILES[name]);
+    createBackup(CONFIG.FILES[name], file.getBlob().getDataAsString(), name);
+  });
+}
+
+function testSlack() {
+  const secrets = getSecrets();
+  if (!secrets.SLACK_BOT_TOKEN) {
+    Logger.log('Token mancante! Usa: setSecrets(null, "xoxb-..."))');
+    return;
+  }
+  
+  UrlFetchApp.fetch('https://slack.com/api/chat.postMessage', {
+    method: 'post',
+    contentType: 'application/json',
+    headers: { 'Authorization': 'Bearer ' + secrets.SLACK_BOT_TOKEN },
+    payload: JSON.stringify({
+      channel: CONFIG.SLACK_CHANNEL_ID,
+      text: '🧪 *UI_Guardian Test* - Connessione OK!'
+    }),
+    muteHttpExceptions: true
   });
 }
