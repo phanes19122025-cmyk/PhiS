@@ -1,4 +1,4 @@
-# Φ-OS
+# ΦS
 
 > Sistema operativo Phanes — Kernel, staging, configurazioni
 
